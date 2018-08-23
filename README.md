@@ -1,4 +1,4 @@
-# vue_jixuetan_cli1.0
+# vue_jtt_cli1.0
 
 > A Vue.js project
 
