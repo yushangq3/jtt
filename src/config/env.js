@@ -13,12 +13,14 @@ let imgBaseUrl;
 
 
 if (process.env.NODE_ENV == 'development') {
-    baseUrl = 'https://apptest.etangbio.com';
-    
+    // baseUrl = 'https://apptest.etangbio.com';
+    baseUrl = 'https://app3.51etang.com';
+
 
 }else if(process.env.NODE_ENV == 'production'){
+	// baseUrl = 'https://apptest.etangbio.com';
 	// baseUrl = 'http://cangdu.org:8001';
-    baseUrl = '';
+    baseUrl = 'https://app3.51etang.com';
 
 }
 

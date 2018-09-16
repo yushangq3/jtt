@@ -28,27 +28,7 @@ html,body,.wrapper,.mui-content{
 	float: left;
 	width: 60%;
 }
-.careCont .care_tr .care_td.select{
-	position: relative;
-	background-image: linear-gradient(0deg, #EDEDED 0%, #F5F5F5 52%, #EDEDED 100%);
-	background-position: 100% 50%;
-	border-radius: 5px;
-}
-.careCont .care_tr .care_td.select input{
-	background: none;
-	padding-right: 30px;
-	width: 100%;
-}
-.careCont .care_tr .care_td.select:after{
-	content: '';
-	position: absolute;
-	width: 10px;
-	height: 20px;
-	background: url(../image/updown.png) no-repeat 50%;
-	background-size: 10px auto;
-	right: 10px;
-	top: 7px;
-}
+
 .careCont .care_tr .care_td input{
 	width:100%;
 	padding: 0 10px;
@@ -81,38 +61,7 @@ html,body,.wrapper,.mui-content{
 	margin-left: 10px;
 	text-decoration: underline;
 }
-.careCont .care_options{
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 10;
-	width: 100%;
-	font-size: 12px;
-	line-height: 16px;
-	width: 100%;
-	padding: 10px 0;
-	background-color: #F4F4F4;
-	border: 1px solid #CCCCCC;
-	border-radius: 5px;
-}
-.careCont .care_options .care_options_title{
-	color: #ccc;
-	padding: 0 0 0 30px;
-}
-.careCont .care_options  .option{
-	margin: 10px 0;
-	padding: 0 0 0 30px;
-}
-.careCont .care_options  .option.selected{
-	background: url(../image/selected.png) no-repeat 6px 50%;
-	background-size: 18px auto;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .4s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
+
 .care_btn{
 	padding: 0;
 	display: block;

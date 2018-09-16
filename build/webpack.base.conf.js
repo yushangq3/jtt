@@ -25,7 +25,7 @@ module.exports = {
     app: [ "./src/main.js"]
   },
   externals:{
-//	'element-ui':'element-ui',
+	'mui':'mui',
 //	'babel-polyfill':'babel-polyfill'
   },
   output: {

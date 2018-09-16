@@ -261,10 +261,14 @@ function javaTrim(str) {
  */
 var now = new Date(); //当前日期
 var nowDayOfWeek = now.getDay(); //今天本周的第几天
+if(nowDayOfWeek==0){
+	nowDayOfWeek=7;
+}
 var nowDay = now.getDate(); //当前日
 var nowMonth = now.getMonth(); //当前月
 var nowYear = now.getYear(); //当前年
 nowYear += (nowYear < 2000) ? 1900 : 0; //
+var timeStamp=new Date().getTime();
 
 var lastMonthDate = new Date(); //上月日期
 lastMonthDate.setDate(1);
@@ -325,19 +329,24 @@ function getQuarterStartMonth() {
 
 //获得本周的开始日期
 function getWeekStartDate() {
+	
 	var weekStartDate = new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + 1);
+	console.log(weekStartDate,'getWeekStartDate')
 	return formatDate(weekStartDate);
 }
 
 //获得本周的结束日期
 function getWeekEndDate() {
 	var weekEndDate = new Date(nowYear, nowMonth, nowDay + (7 - nowDayOfWeek));
+	console.log(weekEndDate,'getWeekEndDate')
+
 	return formatDate(weekEndDate);
 }
 
 //获取本周周日期
 function getNowWeekDates() {
 	var nowWeekDate = [];
+	console.log(nowYear, nowMonth, nowDay,nowDayOfWeek,'getWeek')
 	for(var i = 1; i <= 7; i++) {
 		var month = (new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getMonth() < 9 ? "0" + Number((new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getMonth() + 1) : Number((new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getMonth() + 1);
 		var day = (new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getDate() < 10 ? "0" + (new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getDate() : (new Date(nowYear, nowMonth, nowDay - nowDayOfWeek + i)).getDate();
@@ -414,8 +423,9 @@ function getQuarterEndDate() {
 
 // var requestUrl = "http://192.168.104.25:8081";
 
-var requestUrl = "https://apptest.etangbio.com";
+// var requestUrl = "https://apptest.etangbio.com";
 
+var requestUrl = "https://app3.51etang.com";
 var userid = getPara(/userid=/g);
 var isCare=0;//判断是否是宜糖关怀用户；
 // var userid="100000000500";
@@ -560,9 +570,12 @@ function MealDefaultTime(meal) {
 // 	setTime($("input[name='mealtime']:checked").val());
 // })
 
-function updateInfo(sex, age, height, weight, diabetesType, intensity, callBack) {
+function updateInfo(userCode, sex, age, height, weight, diabetesType, intensity, callBack) {
 	var para = {};
 	para.userid = userid;
+	if(userCode != ""){
+		para.code = userCode;
+	}
 	sex ? para.sex = sex : '';
 	age ? para.age = age : '';
 	height ? para.height = height : '';
@@ -584,17 +597,23 @@ function updateInfo(sex, age, height, weight, diabetesType, intensity, callBack)
 function getRecordMeals(meal) {
 	var mealtime;
 	if(meal == "17") {
+		//凌晨
 		mealtime = "0";
-	} else if(meal == "10" || meal == "12" || meal == "14") {
+	}else if(meal == "10"){
+		mealtime ='4'
+	} else if( meal == "12" || meal == "14") {
+		//空腹餐前
 		mealtime = "1";
 	} else if(meal == "11" || meal == "13" || meal == "15" || meal == "18") {
+		//餐后
 		mealtime = "2";
 	} else if(meal == "16") {
+		//睡前
 		mealtime = "3";
 	}
 	return Number(mealtime);
 }
-var bldGluList;
+var bldGluList,targetGLuList;
 var careGluList=[
 	{
 		levelCode:"FPG001",
@@ -678,11 +697,91 @@ $.ajax({
 		
 	}
 });
+$.ajax({
+	url: requestUrl + '/litapp/goal/get/'+userid,
+	dataType: 'json',
+	type: 'post',
+	contentType: 'application/json',
+	success: function (res) {
+		if(res.code=='0'){
+			targetGLuList=res.data
+		}
+	},
 
+});
 function getLevel(mealTime, val) {
 	var levelCode;
 	var isCare=localStorage.getItem('isCare');
-	if(bldGluList) {
+	if(targetGLuList){
+		for(var i = 0; i < targetGLuList.length; i++) {
+			if(!targetGLuList[i].recordValueFloor){
+				targetGLuList[i].recordValueFloor=4.0
+			}
+			if(!targetGLuList[i].recordValueUpper){
+				targetGLuList[i].recordValueUpper=6.0
+
+			}
+			switch (mealTime) {
+				case 0: //凌晨
+					if(targetGLuList[i].goalName=='凌晨'){
+						if(val<targetGLuList[i].recordValueFloor){
+							levelCode='FPG001'
+						}else if(val>targetGLuList[i].recordValueUpper){
+							levelCode='FPG006'
+						}else{
+							levelCode='FPG003'
+						}
+					}
+				break;
+				case 4: //空腹
+					if(targetGLuList[i].goalName=='空腹'){
+						if(val<targetGLuList[i].recordValueFloor){
+							levelCode='FPG001'
+						}else if(val>targetGLuList[i].recordValueUpper){
+							levelCode='FPG006'
+						}else{
+							levelCode='FPG003'
+						}
+					}
+				break;
+				case 1: //餐前
+					if(targetGLuList[i].goalName=='餐前'){
+						if(val<targetGLuList[i].recordValueFloor){
+							levelCode='FPG001'
+						}else if(val>targetGLuList[i].recordValueUpper){
+							levelCode='FPG006'
+						}else{
+							levelCode='FPG003'
+						}
+					}
+				break;
+				case 2: //餐后
+					if(targetGLuList[i].goalName=='餐后'){
+						console.log(val,targetGLuList[i].recordValueFloor,'getLevel')
+						if(val<targetGLuList[i].recordValueFloor){
+							levelCode='FPG001'
+						}else if(val>targetGLuList[i].recordValueUpper){
+							levelCode='FPG006'
+						}else{
+							levelCode='FPG003'
+						}
+					}
+				break;
+				case 3: //睡前
+					if(targetGLuList[i].goalName=='睡前'){
+						if(val<targetGLuList[i].recordValueFloor){
+							levelCode='FPG001'
+						}else if(val>targetGLuList[i].recordValueUpper){
+							levelCode='FPG006'
+						}else{
+							levelCode='FPG003'
+						}
+					}
+				break;
+			}
+		}
+	}
+	else if(bldGluList) {
 		if(isCare){
 			for(var i = 0; i < careGluList.length; i++) {
 				if(mealTime == careGluList[i].mealTime && (val >= careGluList[i].valueFloor && val <= careGluList[i].valueUpper)) {
@@ -704,8 +803,55 @@ return levelCode;
 }
 
 function getRange(mealTime) {
-	if(bldGluList) {
-		var lowest,heightest;
+	
+	var lowest=0,heightest=0;
+	if(targetGLuList){
+		console.log(mealTime)
+		for(var i = 0; i < targetGLuList.length; i++) {
+			if(!targetGLuList[i].recordValueFloor){
+				targetGLuList[i].recordValueFloor=4.0
+			}
+			if(!targetGLuList[i].recordValueUpper){
+				targetGLuList[i].recordValueFloor=6.0
+
+			}
+			switch (mealTime) {
+				case 0: //凌晨
+					if(targetGLuList[i].goalName=='凌晨'){
+						lowest = targetGLuList[i].recordValueFloor;
+						heightest = targetGLuList[i].recordValueUpper;
+					}
+				break;
+				case 4: //空腹
+					if(targetGLuList[i].goalName=='空腹'){
+						lowest = targetGLuList[i].recordValueFloor;
+						heightest = targetGLuList[i].recordValueUpper;
+					}
+				break;
+				case 1: //餐前
+					if(targetGLuList[i].goalName=='餐前'){
+						lowest = targetGLuList[i].recordValueFloor;
+						heightest = targetGLuList[i].recordValueUpper;
+					}
+				break;
+				case 2: //餐后随机
+					if(targetGLuList[i].goalName=='餐后'){
+						lowest = targetGLuList[i].recordValueFloor;
+						heightest = targetGLuList[i].recordValueUpper;
+					}
+				break;
+				case 3: //睡前
+					if(targetGLuList[i].goalName=='睡前'){
+						lowest = targetGLuList[i].recordValueFloor;
+						heightest = targetGLuList[i].recordValueUpper;
+					}
+				break;
+			}
+		}
+		
+		$("#valRange").text($("input[name='mealtime']:checked +label").text()+"目标："+lowest.toFixed(1)+"~"+heightest.toFixed(1));
+	}else if(bldGluList) {
+		
 		if(isCare){
 			for(var i = 0; i < careGluList.length; i++) {
 				if(mealTime == careGluList[i].mealTime &&  careGluList[i].levelCode=="FPG003") {
@@ -731,6 +877,17 @@ function getRange(mealTime) {
 }
 $("input[name='mealtime']").click(function(){
 	getRange(getRecordMeals($("input[name='mealtime']:checked").val()));
+	var level=getLevel(getRecordMeals($('input[name="mealtime"]:checked').val()),Number($("#inputGlu").val()));
+	$(".canvas-content").removeClass("lanpan jupan hongpan");
+	if (level == "FPG001" || level == "FPG002") {
+		$(".canvas-content").addClass("hongpan");
+	} else if (level == "FPG003") {
+		$(".canvas-content").addClass("lanpan");
+	} else if (level == "FPG004" || level == "FPG005" || level == "FPG006") {
+		$(".canvas-content").addClass("jupan");
+	} else {
+		$(".canvas-content").addClass("lanpan");
+	}
 })
 
  var Terminal = {

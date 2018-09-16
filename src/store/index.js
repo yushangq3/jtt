@@ -7,8 +7,10 @@ Vue.use(Vuex)
 
 const state = {
 	isLoading:false,
-	userInfo:null,
-	openId:null
+	userInfo:{},
+	openId:null,
+	userId:'',
+	GluList:[] //用户血糖目标值
 	
 }
 
